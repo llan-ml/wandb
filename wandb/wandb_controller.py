@@ -184,6 +184,9 @@ class _WandbController:
         self._log_actions: List[Tuple[str, str]] = []
         # keep track of logged debug for print_debug()
         self._log_debug: List[str] = []
+            
+        self._local_runs = []
+        self._local_runs_map = {}
 
         # all backend commands use internal api
         environ = os.environ
@@ -468,6 +471,12 @@ class _WandbController:
 
         self._sweep_runs = _sweep_runs
         self._sweep_runs_map = {r.name: r for r in self._sweep_runs}
+        
+        for r in self._sweep_runs:
+            if r.name not in self._local_runs_map:
+                self._local_runs.append(r)
+                self._local_runs_map[r.name] = r
+                assert len(self._local_runs) == len(self._local_runs_map)
 
         self._controller = json.loads(sweep_obj.get("controller") or "{}")
         self._scheduler = json.loads(sweep_obj.get("scheduler") or "{}")
@@ -574,7 +583,7 @@ class _WandbController:
 
     def _search(self) -> Optional[sweeps.SweepRun]:
         search = self._custom_search or sweeps.next_run
-        next_run = search(self._sweep_config, self._sweep_runs or [])
+        next_run = search(self._sweep_config, self._local_runs or [])
         if next_run is None:
             self._done_scheduling = True
         return next_run
