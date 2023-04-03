@@ -476,7 +476,7 @@ class _WandbController:
             if r.name not in self._local_runs_map:
                 self._local_runs.append(r)
                 self._local_runs_map[r.name] = r
-                assert len(self._local_runs) == len(self._local_runs_map)
+        assert len(self._local_runs) == len(self._local_runs_map)
 
         self._controller = json.loads(sweep_obj.get("controller") or "{}")
         self._scheduler = json.loads(sweep_obj.get("scheduler") or "{}")
